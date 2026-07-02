@@ -36,6 +36,7 @@ vector-stores = [
     "pinecone<=7.3.0",
     "pinecone-text>=0.10.0",
     "faiss-cpu>=1.7.4",
+    "infino>=0.1.2",
     "upstash-vector>=0.6.0",
     "azure-search-documents>=11.4.0b8",
     "psycopg>=3.2.8",

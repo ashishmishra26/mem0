@@ -35,6 +35,7 @@ class VectorStoreConfig(BaseModel):
         "langchain": "LangchainConfig",
         "s3_vectors": "S3VectorsConfig",
         "turbopuffer": "TurbopufferConfig",
+        "infino": "InfinoConfig",
     }
 
     @model_validator(mode="after")

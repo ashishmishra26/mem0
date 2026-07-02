@@ -1,0 +1,61 @@
+---
+title: "Infino"
+description: "Use Infino as an embedded, object-storage-native vector store in Mem0 — hybrid (BM25 + vector) recall over Apache Parquet, with no separate server or cluster."
+---
+[Infino](https://infino.ai) is an open-source retrieval engine for full-text (BM25), vector, and SQL search, with data stored as Apache Parquet on a local path or object storage (S3, GCS, Azure). It runs embedded in-process — there is no separate server or cluster to operate. Because Mem0's search passes the store both the query text and its embedding, the Infino store also implements native keyword (BM25) search, so Mem0's hybrid retrieval works out of the box.
+
+### Usage
+
+```python
+import os
+from mem0 import Memory
+
+os.environ["OPENAI_API_KEY"] = "sk-xx"
+
+config = {
+    "vector_store": {
+        "provider": "infino",
+        "config": {
+            "collection_name": "mem0",
+            "path": "/tmp/infino",
+            "embedding_model_dims": 1536,
+        }
+    }
+}
+
+m = Memory.from_config(config)
+messages = [
+    {"role": "user", "content": "I'm planning to watch a movie tonight. Any recommendations?"},
+    {"role": "assistant", "content": "How about thriller movies? They can be quite engaging."},
+    {"role": "user", "content": "I'm not a big fan of thriller movies but I love sci-fi movies."},
+    {"role": "assistant", "content": "Got it! I'll avoid thriller recommendations and suggest sci-fi movies in the future."}
+]
+m.add(messages, user_id="alice", metadata={"category": "movies"})
+```
+
+`path` also accepts object-storage URIs (`s3://bucket/mem0`, `gs://...`, `az://...`), so memory can live directly on object storage with nothing to run alongside your app.
+
+### Installation
+
+```bash
+pip install infino
+```
+
+### Config
+
+Here are the parameters available for configuring Infino:
+
+| Parameter | Description | Default Value |
+| --- | --- | --- |
+| `collection_name` | The name of the collection (Infino table) | `mem0` |
+| `path` | Local path or object-storage URI (`s3://`, `gs://`, `az://`) | `/tmp/infino` |
+| `embedding_model_dims` | Dimensions of the embedding model (Infino requires ≥ 16) | `1536` |
+| `n_cent` | IVF centroids for the vector index; `1` = exact (right for memory-scale stores) | `1` |
+| `distance_strategy` | Distance metric (options: `cosine`, `euclidean`, `inner_product`) | `cosine` |
+
+### Why Infino
+
+1. **Embedded / in-process**: no server or cluster to run — added to your app as a library.
+2. **Object-storage-native**: memory persists as Apache Parquet on a local path or S3/GCS/Azure and scales with history rather than a fixed cluster.
+3. **Native hybrid**: Infino provides both vector and BM25 keyword search, so Mem0's hybrid retrieval works with no extra dependencies or sparse-index setup.
+4. **SQL-queryable**: the same store answers SQL over memory, enabling structured and time-based queries beyond similarity search.
